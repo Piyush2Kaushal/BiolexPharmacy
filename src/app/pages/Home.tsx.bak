@@ -1,0 +1,467 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
+import {
+  Shield, Award, Clock, Users, CheckCircle, ArrowRight,
+  Package, Microscope, HeartPulse, Star, TrendingUp, Globe, Phone,
+  ChevronDown, ChevronUp, Quote, BadgeCheck, Truck, ThumbsUp,
+  FlaskConical, Pill, Syringe, Droplets,
+} from 'lucide-react';
+import { productAPI, categoryAPI, contentAPI } from '../services/api';
+import { Product, Category, SiteContent } from '../types';
+import InquiryModal from '../components/InquiryModal';
+
+const DEFAULT_CONTENT: SiteContent = {
+  heroTitle: 'Your Trusted Pharma Wholesale Partner',
+  heroSubtitle: 'Biolex Pharmaceutical Private Limited — supplying quality medicines to wholesalers and healthcare professionals across India.',
+  heroBadge: 'ISO 9001:2015 Certified Pharmaceutical Company',
+  featuresTitle: 'Why Biolex Pharmaceutical?',
+  featuresSubtitle: 'Your reliable partner for quality pharmaceutical products',
+  statsYears: '5+', statsProducts: '500+', statsPartners: '100+', statsSupport: '24/7',
+  testimonialTitle: 'What Our Partners Say',
+  testimonialSubtitle: 'Trusted by healthcare professionals and distributors across India',
+  faqTitle: 'Frequently Asked Questions',
+  faqSubtitle: 'Get answers to common questions about our pharmaceutical wholesale services',
+  ctaTitle: 'Ready to Partner With Us?',
+  ctaSubtitle: 'Send us an inquiry for product details, pricing, and availability. Our team responds within 24 hours.',
+  whyUsTitle: 'Why Choose Biolex?',
+  whyUsSubtitle: 'We go beyond just supplying medicines — we build lasting partnerships',
+};
+
+export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<SiteContent>(DEFAULT_CONTENT);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [pRes, cRes, ctRes]: any[] = await Promise.all([
+          productAPI.getAll(),
+          categoryAPI.getAll(),
+          contentAPI.getSection('home'),
+        ]);
+        if (pRes.success) setProducts((pRes.data || []).slice(0, 6));
+        if (cRes.success) setCategories(cRes.data || []);
+        if (ctRes.success) setContent({ ...DEFAULT_CONTENT, ...ctRes.data });
+      } catch (_) {}
+      finally { setLoading(false); }
+    };
+    fetchData();
+  }, []);
+
+  const openInquiry = (product: Product) => { setSelectedProduct(product); setInquiryOpen(true); };
+
+  const features = [
+    { icon: Shield, title: 'ISO 9001:2015 Certified', desc: 'Quality assured pharmaceutical products meeting international standards', color: 'text-blue-600', bg: 'bg-blue-50' },
+    { icon: Package, title: 'Wide Product Range', desc: 'Comprehensive selection across all therapeutic categories', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { icon: Clock, title: 'On-Time Delivery', desc: 'Reliable and timely delivery to ensure continuous supply', color: 'text-orange-600', bg: 'bg-orange-50' },
+    { icon: Users, title: 'B2B Focused', desc: 'Specialized service for wholesalers, distributors and professionals', color: 'text-purple-600', bg: 'bg-purple-50' },
+  ];
+
+  const stats = [
+    { value: content.statsYears, label: 'Years Experience', icon: TrendingUp },
+    { value: content.statsProducts, label: 'Products', icon: Package },
+    { value: content.statsPartners, label: 'Partners', icon: Users },
+    { value: content.statsSupport, label: 'Support', icon: Globe },
+  ];
+
+  const whyUs = [
+    { icon: BadgeCheck, title: 'ISO 9001:2015 Certified', desc: 'Full certification ensuring every product meets international quality benchmarks.' },
+    { icon: Truck, title: 'On-Time Delivery', desc: 'Reliable logistics ensuring your supplies reach you exactly when needed.' },
+    { icon: ThumbsUp, title: 'Competitive Pricing', desc: 'Best wholesale prices with no compromise on product quality or authenticity.' },
+    { icon: Shield, title: 'Quality Assurance', desc: 'Every medicine verified and sourced from trusted manufacturers across India.' },
+    { icon: Users, title: 'Dedicated Support', desc: 'Our team is always available to help with inquiries and after-sales support.' },
+    { icon: Globe, title: 'Pan-India Network', desc: 'Established distribution network covering all major states and cities in India.' },
+  ];
+
+  const testimonials = [
+    { name: 'Rajesh Sharma', role: 'Medical Store Owner, Delhi', rating: 5, text: 'Biolex has been our trusted supplier for over 2 years. Excellent quality products and always on-time delivery. Highly recommended for any pharma business.' },
+    { name: 'Priya Patel', role: 'Distributor, Mumbai', rating: 5, text: 'The product range is extensive and prices are very competitive. The team is professional and responds quickly to all our inquiries.' },
+    { name: 'Dr. Amit Singh', role: 'Clinic Owner, Chandigarh', rating: 4, text: 'Great quality medicines sourced from certified manufacturers. Our clinic has been sourcing from Biolex and the consistency has been impressive.' },
+  ];
+
+  const faqs = [
+    { q: 'What is the minimum order quantity?', a: 'We cater to B2B orders. Minimum quantities vary by product. Please contact us for specific product MOQs and bulk pricing.' },
+    { q: 'Do you offer PAN India delivery?', a: 'Yes, we deliver across all major cities and states in India. Delivery timelines depend on your location and order size.' },
+    { q: 'Are your products certified?', a: 'All our products are sourced from ISO-certified manufacturers and meet regulatory standards set by DCGI and other authorities.' },
+    { q: 'How can I get the latest price list?', a: 'Please send an inquiry through our Contact page or call us directly. Our team will share the latest price list within 24 hours.' },
+    { q: 'Do you offer credit terms for distributors?', a: 'We offer flexible payment terms for established distributors. Contact our sales team to discuss credit arrangements.' },
+    { q: 'What product categories do you carry?', a: 'We carry Tablets, Capsules, Syrups, Injections, Drops, Protein Powders, Energy Drinks, and PCD Pharma Franchise products.' },
+  ];
+
+  const certifications = [
+    { title: 'ISO 9001:2015', desc: 'Quality Management', icon: BadgeCheck, color: 'blue' },
+    { title: 'DCGI Compliant', desc: 'Drug Controller Approved', icon: Shield, color: 'green' },
+    { title: 'GMP Certified', desc: 'Good Manufacturing Practices', icon: Award, color: 'purple' },
+    { title: 'GST Registered', desc: 'No. 04AAJCB2451N1ZM', icon: CheckCircle, color: 'orange' },
+  ];
+
+  const productTypes = [
+    { icon: Pill, label: 'Tablets', color: 'bg-blue-50 text-blue-600' },
+    { icon: Package, label: 'Capsules', color: 'bg-purple-50 text-purple-600' },
+    { icon: FlaskConical, label: 'Syrups', color: 'bg-emerald-50 text-emerald-600' },
+    { icon: Syringe, label: 'Injections', color: 'bg-red-50 text-red-600' },
+    { icon: Droplets, label: 'Drops', color: 'bg-cyan-50 text-cyan-600' },
+    { icon: Globe, label: 'PCD Franchise', color: 'bg-orange-50 text-orange-600' },
+  ];
+
+  const categoryIcons = [Package, Microscope, HeartPulse, Award, Star, Globe];
+
+  return (
+    <div className="overflow-x-hidden">
+      {/* ── Hero ───────────────────────────────────────────────────────────── */}
+      <section className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 text-white overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-36">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full text-sm mb-6">
+                <Star className="w-4 h-4 text-yellow-300" /> {content.heroBadge}
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
+                {content.heroTitle.split(' ').slice(0,2).join(' ')}
+                <span className="block text-blue-200">{content.heroTitle.split(' ').slice(2).join(' ')}</span>
+              </h1>
+              <p className="text-xl text-blue-100 mb-10 leading-relaxed">{content.heroSubtitle}</p>
+              <div className="flex flex-wrap gap-4">
+                <Link to="/products" className="inline-flex items-center gap-2 bg-white text-blue-700 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                  Browse Products <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link to="/contact" className="inline-flex items-center gap-2 border-2 border-white/50 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all">
+                  <Phone className="w-5 h-5" /> Get Quote
+                </Link>
+              </div>
+            </div>
+            <div className="hidden md:block">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-8">
+                <div className="grid grid-cols-2 gap-6">
+                  {stats.map((s, i) => (
+                    <div key={i} className="text-center p-4 bg-white/5 rounded-xl">
+                      <s.icon className="w-7 h-7 text-blue-200 mx-auto mb-2" />
+                      <div className="text-4xl font-bold mb-1">{s.value}</div>
+                      <div className="text-blue-200 text-sm">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 pt-6 border-t border-white/20 flex items-center gap-3">
+                  <div className="flex -space-x-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-blue-400 border-2 border-blue-600 flex items-center justify-center text-xs font-bold">
+                        {String.fromCharCode(65 + i)}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-blue-200">Trusted by 100+ healthcare partners</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Product Type Showcase ───────────────────────────────────────────── */}
+      <section className="py-10 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {productTypes.map((pt, i) => (
+              <Link key={i} to={`/products`}
+                className={`flex flex-col items-center gap-2 p-4 rounded-2xl ${pt.color} hover:scale-105 transition-transform cursor-pointer`}>
+                <pt.icon className="w-8 h-8" />
+                <span className="text-sm font-semibold text-center">{pt.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features / Why Choose Us ────────────────────────────────────────── */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Why Choose Us</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.featuresTitle}</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">{content.featuresSubtitle}</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((f, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100">
+                <div className={`w-14 h-14 ${f.bg} rounded-xl flex items-center justify-center mb-5`}>
+                  <f.icon className={`w-7 h-7 ${f.color}`} />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Featured Products ───────────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Our Range</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Featured Products</h2>
+            </div>
+            <Link to="/products" className="hidden md:inline-flex items-center gap-2 text-blue-600 font-semibold hover:gap-3 transition-all">
+              View All <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => <div key={i} className="bg-gray-100 rounded-2xl h-72 animate-pulse" />)}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 bg-gray-50 rounded-2xl">
+              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">No products yet. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <Link key={product._id} to={`/products/${product._id}`}
+                  className="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block">
+                  <div className="relative overflow-hidden h-52 bg-gradient-to-br from-blue-50 to-gray-100">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="w-20 h-20 text-blue-200" />
+                      </div>
+                    )}
+                    {product.categoryName && (
+                      <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        {product.categoryName}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    {product.form && <p className="text-xs text-blue-500 font-semibold mb-1">{product.form}</p>}
+                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1">{product.name}</h3>
+                    <p className="text-gray-500 text-sm mb-4 line-clamp-2">{product.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-blue-600 font-semibold text-sm">Get Latest Price</span>
+                      <span className="text-blue-600 font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                        View Details <ArrowRight className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-10">
+            <Link to="/products" className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+              View All Products <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Categories ─────────────────────────────────────────────────────── */}
+      {categories.length > 0 && (
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Browse By</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Product Categories</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {categories.map((cat, i) => {
+                const Icon = categoryIcons[i % categoryIcons.length];
+                return (
+                  <Link key={cat._id} to={`/products?category=${cat._id}`}
+                    className="group bg-white p-6 rounded-2xl border-2 border-gray-100 hover:border-blue-500 hover:shadow-lg transition-all duration-300 text-center">
+                    <div className="w-14 h-14 bg-blue-50 group-hover:bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                      <Icon className="w-7 h-7 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-1">{cat.name}</h3>
+                    {cat.description && <p className="text-gray-500 text-sm line-clamp-2">{cat.description}</p>}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Why Choose Us (Detailed) ─────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Our Advantage</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.whyUsTitle}</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">{content.whyUsSubtitle}</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {whyUs.map((item, i) => (
+              <div key={i} className="flex gap-4 p-5 bg-gray-50 rounded-2xl hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Certifications ──────────────────────────────────────────────────── */}
+      <section className="py-16 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-2">Quality Assurance</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Certifications</h2>
+            <p className="text-blue-200 text-lg max-w-xl mx-auto">Every product we supply meets the highest regulatory and quality standards in India.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+            {certifications.map((cert, i) => (
+              <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center hover:bg-white/20 transition-colors">
+                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <cert.icon className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="font-bold text-white text-lg mb-1">{cert.title}</h3>
+                <p className="text-blue-200 text-sm">{cert.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">Testimonials</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.testimonialTitle}</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">{content.testimonialSubtitle}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <div key={i} className="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow relative">
+                <Quote className="w-8 h-8 text-blue-100 absolute top-6 right-6" />
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, s) => (
+                    <Star key={s} className={`w-4 h-4 ${s < t.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`} />
+                  ))}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6 italic">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm">{t.name}</p>
+                    <p className="text-gray-400 text-xs">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── About Strip ─────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-14 items-center">
+            <div>
+              <p className="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-3">About Us</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Biolex Pharmaceutical Private Limited</h2>
+              <p className="text-blue-100 text-lg mb-8 leading-relaxed">
+                ISO 9001:2015 certified company established in 2021, engaged in wholesale trading and supplying quality pharmaceutical medicines to healthcare professionals and distributors across India.
+              </p>
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {['ISO 9001:2015 Certified','Quality Assured Products','Competitive Wholesale Pricing','Professional Customer Service','Extensive Product Portfolio','Trusted by Healthcare Professionals'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-blue-100">
+                    <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    <span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <Link to="/about" className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
+                Learn More <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-8 space-y-5">
+              {[
+                { label: 'CEO', value: 'Ravi Kumar Bhalla' },
+                { label: 'Location', value: 'Manimajra, Chandigarh' },
+                { label: 'Business Type', value: 'Wholesaler / Distributor' },
+                { label: 'Established', value: '2021' },
+                { label: 'Certification', value: 'ISO 9001:2015' },
+                { label: 'GST No.', value: '04AAJCB2451N1ZM' },
+              ].map((item, i) => (
+                <div key={i} className="flex justify-between items-center border-b border-white/10 pb-4 last:border-0 last:pb-0">
+                  <span className="text-blue-300 text-sm">{item.label}</span>
+                  <span className="font-semibold text-sm">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ─────────────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-2">FAQ</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.faqTitle}</h2>
+            <p className="text-gray-600 text-lg">{content.faqSubtitle}</p>
+          </div>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div key={i} className="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-100 transition-colors">
+                  <span className="font-semibold text-gray-900 pr-4">{faq.q}</span>
+                  {openFaq === i ? <ChevronUp className="w-5 h-5 text-blue-600 flex-shrink-0" /> : <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />}
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-5">
+                    <p className="text-gray-600 leading-relaxed">{faq.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ─────────────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-12 text-white">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.ctaTitle}</h2>
+            <p className="text-blue-100 text-lg mb-8 max-w-xl mx-auto">{content.ctaSubtitle}</p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link to="/contact" className="inline-flex items-center gap-2 bg-white text-blue-700 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-colors shadow-lg">
+                Send Inquiry Now <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link to="/products" className="inline-flex items-center gap-2 border-2 border-white/50 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-colors">
+                Browse Products
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <InquiryModal isOpen={inquiryOpen} onClose={() => setInquiryOpen(false)} product={selectedProduct} />
+    </div>
+  );
+}
